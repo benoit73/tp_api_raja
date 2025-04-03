@@ -2,6 +2,19 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
 
+router.get('/login', async (req, res) => {
+  const { email, password } = req.query;
+  const login = await userController.connectUser(email, password);
+  if (login)
+  {
+    res.status(200).send(login);
+  }
+  else
+  {
+    res.status(401).send('Invalid credentials');
+  }
+});
+
 router.get('/users', async (req, res) => {
   const users = await userController.getAllUsers();
   res.send(users);

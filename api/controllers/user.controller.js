@@ -1,8 +1,11 @@
 const User = require('../models/user.model');
+const { hash } = require('../service/hash');
+const jwtService = require('../service/jwt');
 
 const userController = {
-    async addUser(firstName, lastName) {
-        const user = User.build({firstName: firstName, lastName: lastName});
+    async addUser(firstName, lastName, email, password) {
+        const hashedPassword = hash(password);
+        const user = User.build({firstName: firstName, lastName: lastName, email: email, password: hashedPassword});
         try{
             await user.save();
             return true;
@@ -11,6 +14,17 @@ const userController = {
             return error;
         }
         
+    },
+
+    async connectUser(email, password) {
+        const hashedPassword = hash(password);
+        const user = User.findOne({ where: {email: email, password: hashedPassword}});
+        if (user)
+        {
+            const jwt = jwtService.getJwt(user.id);
+            return {jwt: jwt, email: email};
+        }
+        return false;
     },
 
     async getUserById(id) {
